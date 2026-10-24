@@ -1,0 +1,41 @@
+
+name: Build Unlimited Storage Left Stick Fix
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Check source files
+        run: |
+          find . -name 'ModEntry.cs' -o -name '*.sln' -o -name '*.csproj'
+
+      - name: Build project
+        shell: bash
+        run: |
+          set -e
+          PROJECT=$(find . -name '*.sln' -print -quit)
+          if [ -z "$PROJECT" ]; then
+            PROJECT=$(find . -name '*.csproj' -print -quit)
+          fi
+          if [ -z "$PROJECT" ]; then
+            echo "Project source not found"
+            exit 1
+          fi
+          dotnet build "$PROJECT" --configuration Release
+          
